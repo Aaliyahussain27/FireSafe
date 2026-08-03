@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.compose.compiler)
@@ -5,14 +7,25 @@ plugins {
 }
 
 android {
-    namespace = "com.example.smartflame"
+    namespace = "com.example.firesafe"
     compileSdk = 36
     defaultConfig {
-        applicationId = "com.example.smartflame"
+        applicationId = "com.example.firesafe"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+
+        val localProperties = Properties()
+        val localPropertiesFile = project.rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(localPropertiesFile.inputStream())
+        }
+        val authKey = localProperties.getProperty("MSG91_AUTH_KEY") ?: ""
+        val templateId = localProperties.getProperty("MSG91_TEMPLATE_ID") ?: ""
+
+        buildConfigField("String", "MSG91_AUTH_KEY", "\"$authKey\"")
+        buildConfigField("String", "MSG91_TEMPLATE_ID", "\"$templateId\"")
     }
 
     buildTypes {
@@ -28,7 +41,7 @@ android {
     buildFeatures {
       compose = true
       aidl = false
-      buildConfig = false
+      buildConfig = true
       shaders = false
     }
 
@@ -89,4 +102,9 @@ dependencies {
   implementation(libs.camera.camera2)
   implementation(libs.camera.lifecycle)
   implementation(libs.camera.view)
+
+  // Retrofit & OkHttp
+  implementation("com.squareup.retrofit2:retrofit:2.9.0")
+  implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+  implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 }
